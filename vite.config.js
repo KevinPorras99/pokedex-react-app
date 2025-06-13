@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
-export default defineConfig({
-  base: '/pokedex-react-app/',
+export default defineConfig(({ mode }) => ({
+  base: mode === 'production' ? '/pokedex-react-app/' : '/', // 👈 clave aquí
   plugins: [react()],
-})
+}))
