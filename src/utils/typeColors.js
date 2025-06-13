@@ -1,0 +1,20 @@
+export const typeColors = {
+  normal: 'bg-gray-400',
+  fire: 'bg-gradient-to-r from-red-500 to-orange-500',
+  water: 'bg-blue-500',
+  electric: 'bg-yellow-400',
+  grass: 'bg-green-500',
+  ice: 'bg-cyan-300',
+  fighting: 'bg-red-600',
+  poison: 'bg-purple-500',
+  ground: 'bg-gradient-to-r from-yellow-600 to-yellow-700',
+  flying: 'bg-gradient-to-r from-blue-400 to-gray-300',
+  psychic: 'bg-pink-500',
+  bug: 'bg-lime-500',
+  rock: 'bg-yellow-800',
+  ghost: 'bg-purple-700',
+  dragon: 'bg-gradient-to-r from-purple-600 to-red-600',
+  dark: 'bg-gray-800',
+  steel: 'bg-gray-400',
+  fairy: 'bg-pink-300'
+};
