@@ -6,14 +6,17 @@ import FilterBar from '../components/UI/FilterBar';
 import api from '../services/api';
 import backgroundImage from '../assets/background.png';
 
+const MAX_POKEMON_ID = 1302;
+const BATCH_SIZE = 50;
+
 const PokedexPage = () => {
   const [pokemonData, setPokemonData] = useState([]);
   const [filteredPokemon, setFilteredPokemon] = useState([]);
   const [searchTerm, setSearchTerm] = useState(
     sessionStorage.getItem('pokedexSearchTerm') || ''
   );
-  const [selectedType, setSelectedType] = useState(
-    sessionStorage.getItem('pokedexSelectedType') || ''
+  const [selectedTypes, setSelectedTypes] = useState(
+    JSON.parse(sessionStorage.getItem('pokedexSelectedTypes')) || []
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,108 +27,115 @@ const PokedexPage = () => {
     parseInt(sessionStorage.getItem('pokedexPage')) || 1
   );
 
-  // Save states to sessionStorage
-  useEffect(() => {
-    sessionStorage.setItem('pokedexPage', currentPage.toString());
-    sessionStorage.setItem('pokedexSearchTerm', searchTerm);
-    sessionStorage.setItem('pokedexSelectedType', selectedType);
-    sessionStorage.setItem('pokedexSortBy', sortBy);
-  }, [currentPage, searchTerm, selectedType, sortBy]);
-
-  useEffect(() => {
-    const fetchPokemon = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Fetch initial list with limit of 151 for first generation
-        const { results } = await api.getAllPokemon(1025, 0);
-        
-        // Fetch details in smaller batches to avoid rate limiting
-        const detailedData = [];
-        for (let i = 0; i < results.length; i += 20) {
-          const batch = results.slice(i, i + 20);
-          const batchData = await Promise.all(
-            batch.map(async (pokemon) => {
-              try {
-                const details = await api.getPokemonByName(pokemon.name);
-                return {
-                  ...pokemon,
-                  id: details.id,
-                  types: details.types.map(t => t.type.name),
-                  sprites: details.sprites
-                };
-              } catch (error) {
-                console.error(`Error fetching ${pokemon.name}:`, error);
-                return null;
-              }
-            })
-          );
-          detailedData.push(...batchData.filter(Boolean));
-          
-          // Update state progressively
-          setPokemonData(prev => [...prev, ...batchData.filter(Boolean)]);
-        }
-
-        // Final sort and filter
-        const sortedData = detailedData.sort((a, b) => a.id - b.id);
-        setPokemonData(sortedData);
-        filterAndSortPokemon(searchTerm, selectedType, sortBy, sortedData);
-      } catch (error) {
-        console.error('Error:', error);
-        setError('Error loading Pokémon. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPokemon();
-  }, []);
-
-  const filterAndSortPokemon = (term, type, sort, data = pokemonData) => {
-    let filtered = [...data];
+  // Define filterAndSortPokemon before using it
+  const filterAndSortPokemon = (term, types, sort, data) => {
+    let filtered = [...(data || pokemonData)];
 
     if (term?.trim()) {
       filtered = filtered.filter(pokemon =>
-        pokemon.name.toLowerCase().includes(term.toLowerCase())
+        pokemon?.name.toLowerCase().includes(term.toLowerCase())
       );
     }
 
-    if (type) {
+    if (types.length > 0) {
       filtered = filtered.filter(pokemon =>
-        pokemon.types.includes(type)
+        pokemon && types.every(type => pokemon.types.includes(type))
       );
     }
 
-    switch (sort) {
-      case 'name':
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case 'id':
-        filtered.sort((a, b) => a.id - b.id);
-        break;
-      default:
-        break;
-    }
+    filtered.sort((a, b) => {
+      if (sort === 'name') return a?.name.localeCompare(b?.name);
+      return (a?.id || 0) - (b?.id || 0);
+    });
 
     setFilteredPokemon(filtered);
   };
 
+  useEffect(() => {
+    sessionStorage.setItem('pokedexPage', currentPage.toString());
+    sessionStorage.setItem('pokedexSearchTerm', searchTerm);
+    sessionStorage.setItem('pokedexSelectedTypes', JSON.stringify(selectedTypes));
+    sessionStorage.setItem('pokedexSortBy', sortBy);
+  }, [currentPage, searchTerm, selectedTypes, sortBy]);
+
+  useEffect(() => {
+  const loadAllPokemon = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Get initial list of all Pokémon
+      const allData = await api.getAllPokemon(MAX_POKEMON_ID, 0);
+      console.log(`Found ${allData.results.length} Pokémon to load`);
+
+      let loadedPokemon = [];
+      for (const pokemon of allData.results) {
+        try {
+          const details = await api.getPokemonByName(pokemon.name);
+          if (details) {
+            const processedPokemon = {
+              id: details.id,
+              name: details.name,
+              types: details.types.map(t => t.type.name),
+              sprites: {
+                front_default: details.sprites.front_default,
+                other: {
+                  'official-artwork': {
+                    front_default: details.sprites.other?.['official-artwork']?.front_default
+                  }
+                }
+              }
+            };
+
+            loadedPokemon.push(processedPokemon);
+            
+            // Sort and update state every 10 Pokémon
+            if (loadedPokemon.length % 10 === 0) {
+              const sortedPokemon = [...loadedPokemon].sort((a, b) => a.id - b.id);
+              setPokemonData(sortedPokemon);
+              filterAndSortPokemon(searchTerm, selectedTypes, sortBy, sortedPokemon);
+              
+              const progress = Math.round((loadedPokemon.length / allData.results.length) * 100);
+              console.log(`Progress: ${progress}% (${loadedPokemon.length}/${allData.results.length})`);
+            }
+          }
+        } catch (error) {
+          console.error(`Failed to load ${pokemon.name}:`, error);
+          continue;
+        }
+      }
+
+      // Final update with all loaded Pokémon
+      const finalPokemon = [...loadedPokemon].sort((a, b) => a.id - b.id);
+      setPokemonData(finalPokemon);
+      filterAndSortPokemon(searchTerm, selectedTypes, sortBy, finalPokemon);
+      setLoading(false);
+
+    } catch (error) {
+      console.error('Error loading Pokémon:', error);
+      setError('Error loading Pokémon. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  loadAllPokemon();
+}, []);
+
   const handleSearch = (term) => {
     setSearchTerm(term);
-    filterAndSortPokemon(term, selectedType, sortBy);
+    filterAndSortPokemon(term, selectedTypes, sortBy);
     setCurrentPage(1);
   };
 
-  const handleTypeChange = (type) => {
-    setSelectedType(type);
-    filterAndSortPokemon(searchTerm, type, sortBy);
+  const handleTypeChange = (types) => {
+    setSelectedTypes(types);
+    filterAndSortPokemon(searchTerm, types, sortBy);
     setCurrentPage(1);
   };
 
-  const handleSort = (sort) => {
-    setSortBy(sort);
-    filterAndSortPokemon(searchTerm, selectedType, sort);
+  const handleSort = (sortType) => {
+    setSortBy(sortType);
+    filterAndSortPokemon(searchTerm, selectedTypes, sortType);
   };
 
   const handlePageChange = (newPage) => {
@@ -194,7 +204,7 @@ const PokedexPage = () => {
           />
           
           <FilterBar
-            selectedType={selectedType}
+            selectedTypes={selectedTypes}
             onTypeChange={handleTypeChange}
           />
 
@@ -232,7 +242,7 @@ const PokedexPage = () => {
           className="text-center mb-6 text-white text-sm"
         >
           Showing {filteredPokemon.length} Pokémon
-          {selectedType && ` of type ${selectedType}`}
+          {selectedTypes.length > 0 && ` of types ${selectedTypes.join(' & ')}`}
           {searchTerm && ` matching "${searchTerm}"`}
         </motion.div>
 
@@ -249,6 +259,8 @@ const PokedexPage = () => {
             pokemonData={filteredPokemon}
             currentPage={currentPage}
             onPageChange={handlePageChange}
+            itemsPerPage={20}
+            totalItems={filteredPokemon.length}
           />
         )}
       </div>

@@ -1,60 +1,73 @@
 const BASE_URL = 'https://pokeapi.co/api/v2';
 
 const api = {
-  getAllPokemon: async (limit = 20, offset = 0) => {
+  async getAllPokemon(limit = 20, offset = 0) {
     try {
+      console.log(`Fetching Pokémon list: limit=${limit}, offset=${offset}`);
       const response = await fetch(`${BASE_URL}/pokemon?limit=${limit}&offset=${offset}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       return await response.json();
     } catch (error) {
-      throw new Error('Error fetching Pokemon list');
+      console.error('getAllPokemon error:', error);
+      throw error;
     }
   },
 
-  getPokemonId: async (name) => {
+  async getPokemonByName(name, retryCount = 0) {
     try {
-      const response = await fetch(`${BASE_URL}/pokemon/${name.toLowerCase()}`);
-      const data = await response.json();
-      return data.id;
+      const response = await fetch(`${BASE_URL}/pokemon/${name}`);
+      
+      if (response.status === 429 && retryCount < MAX_RETRIES) {
+        console.log(`Rate limited for ${name}, retrying...`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        return this.getPokemonByName(name, retryCount + 1);
+      }
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${name}: ${response.status}`);
+      }
+
+      return await response.json();
     } catch (error) {
-      console.error('Error fetching Pokemon ID:', error);
+      console.error(`Error fetching ${name}:`, error);
       return null;
     }
   },
 
-  getPokemonByName: async (name) => {
+  async getPokemonSpecies(id) {
     try {
-      const response = await fetch(`${BASE_URL}/pokemon/${name.toLowerCase()}`);
+      const response = await fetch(`${BASE_URL}/pokemon-species/${id}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch species ${id}: ${response.status}`);
+      }
+
       return await response.json();
+      
     } catch (error) {
-      throw new Error('Error fetching Pokemon details');
+      console.error(`Error fetching species ${id}:`, error);
+      return null;
     }
   },
 
-  getPokemonSpecies: async (name) => {
-    try {
-      const response = await fetch(`${BASE_URL}/pokemon-species/${name.toLowerCase()}`);
-      return await response.json();
-    } catch (error) {
-      throw new Error('Error fetching Pokemon species');
-    }
-  },
-
-  getEvolutionChain: async (url) => {
+  async getEvolutionChain(url) {
     try {
       const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch evolution chain: ${response.status}`);
+      }
+
       return await response.json();
+      
     } catch (error) {
-      throw new Error('Error fetching evolution chain');
+      console.error('Error fetching evolution chain:', error);
+      return null;
     }
-  },
-
-  getPokemonIdFromUrl: (url) => {
-    const matches = url.match(/\/pokemon\/(\d+)\//);
-    return matches ? matches[1] : null;
-  },
-
-  getPokemonUrl: (name) => {
-    return `${BASE_URL}/pokemon/${name}`;
   }
 };
 

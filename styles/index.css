@@ -2,21 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos personalizados para las tarjetas de Pokémon */
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('/fonts/PressStart2P-Regular.ttf') format('truetype');
+}
+
 body {
-  @apply bg-red-500 font-game;
+  @apply bg-gray-100;
+  font-family: 'Press Start 2P', cursive;
+  image-rendering: pixelated;
 }
 
 .pokemon-card {
-  @apply bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200;
+  @apply transition-transform duration-200;
+  image-rendering: pixelated;
+  background: linear-gradient(to bottom, #60a5fa, #3b82f6);
+  box-shadow: 
+    -4px 0 0 0 #1d4ed8,
+    4px 0 0 0 #1d4ed8,
+    0 -4px 0 0 #1d4ed8,
+    0 4px 0 0 #1d4ed8,
+    -3px -3px 0 0 #1d4ed8,
+    -3px 3px 0 0 #1d4ed8,
+    3px -3px 0 0 #1d4ed8,
+    3px 3px 0 0 #1d4ed8;
+}
+
+.pokemon-card:hover {
+  transform: scale(1.05);
+  z-index: 10;
+  box-shadow: 
+    -4px 0 0 0 #1e40af,
+    4px 0 0 0 #1e40af,
+    0 -4px 0 0 #1e40af,
+    0 4px 0 0 #1e40af,
+    -3px -3px 0 0 #1e40af,
+    -3px 3px 0 0 #1e40af,
+    3px -3px 0 0 #1e40af,
+    3px 3px 0 0 #1e40af;
 }
 
 .pokemon-card img {
   @apply w-32 h-32 mx-auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  image-rendering: pixelated;
 }
 
 .pokemon-card h2 {
-  @apply text-xl font-bold text-center mt-2 capitalize;
+  @apply text-xl font-bold text-center mt-2 capitalize text-white;
+  text-shadow: 1px 1px 0 #1d4ed8, -1px -1px 0 #1d4ed8, 
+               1px -1px 0 #1d4ed8, -1px 1px 0 #1d4ed8;
 }
 
 .pokemon-types {
@@ -24,37 +59,78 @@ body {
 }
 
 .type-badge {
-  @apply px-3 py-1 rounded-full text-sm text-white;
+  @apply px-3 py-1 rounded-full text-sm text-white font-game;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
 }
 
 /* Adjust heading sizes for pixel font */
 h1 {
-  @apply text-2xl leading-relaxed;
+  @apply text-2xl mb-4;
 }
 
 h2 {
-  @apply text-2xl leading-relaxed;
+  @apply text-xl mb-3;
 }
 
 .pixel-border {
-  @apply relative;
+  @apply border-4 border-gray-800;
   box-shadow: 
-    -4px 0 0 0 #000,
-    4px 0 0 0 #000,
-    0 -4px 0 0 #000,
-    0 4px 0 0 #000,
-    -3px -3px 0 0 #000,
-    -3px 3px 0 0 #000,
-    3px -3px 0 0 #000,
-    3px 3px 0 0 #000;
+    -4px 0 0 0 #1f2937,
+    4px 0 0 0 #1f2937,
+    0 -4px 0 0 #1f2937,
+    0 4px 0 0 #1f2937;
 }
 
-.pokemon-card {
-  @apply bg-white rounded-none transition-transform duration-200 hover:scale-105;
-  image-rendering: pixelated;
+.font-game {
+  font-family: 'Press Start 2P', cursive;
 }
 
-.pokemon-card:hover {
-  transform: scale(1.05);
-  z-index: 10;
+.modal-open {
+  overflow: hidden;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-200;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-blue-500;
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-blue-600;
+}
+
+/* Loading animation */
+@keyframes loading-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.loading-animation {
+  animation: loading-bounce 1s infinite;
+}
+
+/* Pagination styling */
+.pagination-button {
+  @apply px-4 py-2 rounded-full text-xs transition-all font-game;
+  @apply bg-blue-500 text-white hover:bg-blue-600;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.pagination-button:disabled {
+  @apply opacity-50 cursor-not-allowed hover:bg-blue-500;
 }
