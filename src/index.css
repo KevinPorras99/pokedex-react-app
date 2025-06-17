@@ -6,23 +6,25 @@
 
 @layer base {
   html {
-    font-size: 18px;  /* Increased base font size */
+    font-size: 17px;
+    /* Increased base font size */
   }
-  
+
   body {
-    @apply font-quicksand text-lg;  /* Increased from text-base */
+    @apply font-quicksand text-lg;
+    /* Increased from text-base */
   }
 
   h1 {
-    @apply text-4xl font-bold font-quicksand mb-6;
+    @apply text-xl font-bold font-quicksand mb-6;
   }
 
   h2 {
-    @apply text-3xl font-bold font-quicksand mb-4;
+    @apply text-xl font-bold font-quicksand mb-4;
   }
 
   h3 {
-    @apply text-2xl font-bold font-quicksand mb-3;
+    @apply text-xl font-bold font-quicksand mb-3;
   }
 }
 
@@ -37,7 +39,7 @@
 
 .pixel-border {
   @apply border-4 border-gray-800;
-  box-shadow: 
+  box-shadow:
     -4px 0 0 0 #1f2937,
     4px 0 0 0 #1f2937,
     0 -4px 0 0 #1f2937,
