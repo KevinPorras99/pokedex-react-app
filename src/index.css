@@ -1,69 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+
 @font-face {
-  font-family: 'Press Start 2P';
-  src: url('/fonts/PressStart2P-Regular.ttf') format('truetype');
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-Regular.ttf') format('truetype');
   font-display: swap;
 }
 
 body {
-  @apply bg-blue-100;
-  font-family: 'Press Start 2P', cursive;
-  image-rendering: pixelated;
-}
-
-.pokemon-card {
-  @apply transition-transform duration-200;
-  image-rendering: pixelated;
-  background: linear-gradient(to bottom, #60a5fa, #ffffff);
-  box-shadow: 
-    -4px 0 0 0 #5177e0,
-    4px 0 0 0 #5177e0,
-    0 -4px 0 0 #5177e0,
-    0 4px 0 0 #5177e0,
-    -3px -3px 0 0 #5177e0,
-    -3px 3px 0 0 #5177e0,
-    3px -3px 0 0 #5177e0,
-    3px 3px 0 0 #5177e0;
-}
-
-.pokemon-card:hover {
-  transform: scale(1.05);
-  z-index: 10;
-  box-shadow: 
-    -4px 0 0 0 #0738da,
-    4px 0 0 0 #0738da,
-    0 -4px 0 0 #0738da,
-    0 4px 0 0 #0738da,
-    -3px -3px 0 0 #0738da,
-    -3px 3px 0 0 #0738da,
-    3px -3px 0 0 #0738da,
-    3px 3px 0 0 #0738da;
-    transition: all 0.25s ease-out;
-}
-
-.pokemon-card .image-container {
-  @apply relative overflow-hidden w-32 h-32 mx-auto;
-}
-
-.pokemon-card:hover img {
-  transform: scale(1.2);
-  transition: all 0.25s ease-out;
-}
-
-.pokemon-card img {
-  @apply w-32 h-32 mx-auto;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-  image-rendering: pixelated;
-}
-
-.pokemon-card h2 {
-  @apply text-xl font-bold text-center mt-2 capitalize text-white;
-  text-shadow: 1px 1px 0 #1d4ed8, -1px -1px 0 #1d4ed8, 
-               1px -1px 0 #1d4ed8, -1px 1px 0 #1d4ed8;
-}
+    @apply font-montserrat text-base;
+  }
 
 .pokemon-types {
   @apply flex justify-center gap-2 mt-2;
@@ -137,7 +87,7 @@ h2 {
 
 /* Pagination styling */
 .pagination-button {
-  @apply px-4 py-2 rounded-full text-xs transition-all font-game;
+  @apply px-4 py-2 rounded-full text-base transition-all font-montserrat font-bold;
   @apply bg-blue-500 text-white hover:bg-blue-600;
   text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.2);
 }

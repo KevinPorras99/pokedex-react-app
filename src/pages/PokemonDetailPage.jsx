@@ -87,47 +87,46 @@ const PokemonDetailPage = () => {
 
   if (loading) {
     return (
-      <div 
-        className="min-h-screen bg-cover bg-center bg-fixed"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${backgroundImage})`
-        }}
-      >
-        <div className="text-center pt-20 font-game text-white text-sm">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black animate-gradient-slow">
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center font-game text-white text-sm">
+            Loading...
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (error || !pokemon || !species) {
+  if (error || !pokemon) {
     return (
-      <div 
-        className="min-h-screen bg-cover bg-center bg-fixed"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${backgroundImage})`
-        }}
-      >
-        <div className="text-center pt-20 font-game text-red-500 text-sm">
-          {error || 'Pokémon not found'}
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black animate-gradient-slow">
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center font-game text-red-500">
+            {error || 'Pokemon not found'}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="min-h-screen bg-cover bg-center bg-fixed"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${backgroundImage})`
-      }}
-    >
-      <div className="container mx-auto px-4 py-8">
-        <Link to="/" className="inline-block mb-6 text-white hover:text-gray-200 font-game text-sm">
-          &larr; Back to Pokédex
-        </Link>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black animate-gradient-slow">
+      <div 
+        className="min-h-screen py-8"
+        style={{
+          background: `
+            radial-gradient(circle at 100% 0%, rgba(221, 221, 221, 0.8) 0%, transparent 50%),
+            radial-gradient(circle at 0% 100%, rgba(0,0,0,0.8) 0%, transparent 50%)
+          `
+        }}
+      >
+        <div className="container mx-auto px-4">
+          <Link 
+            to="/" 
+            className="inline-block mb-6 text-white hover:text-gray-200 font-game text-sm"
+          >
+            &larr; Back to Pokédex
+          </Link>
         
         <div className="bg-white rounded-lg shadow-lg p-6 pixel-border">
           <motion.div 
@@ -277,7 +276,8 @@ const PokemonDetailPage = () => {
           )}
         </div>
       </div>
-    </motion.div>
+        </div>
+      </div>
   );
 };
 

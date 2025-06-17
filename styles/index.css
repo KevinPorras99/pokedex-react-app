@@ -2,16 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Press Start 2P';
-  src: url('/fonts/PressStart2P-Regular.ttf') format('truetype');
-}
 
-body {
-  @apply bg-gray-100;
-  font-family: 'Press Start 2P', cursive;
-  image-rendering: pixelated;
-}
+
 
 .pokemon-card {
   @apply transition-transform duration-200;

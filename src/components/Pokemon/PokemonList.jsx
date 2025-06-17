@@ -1,12 +1,13 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import PokemonCard from './PokemonCard';
+import Pagination from '../UI/Pagination';
 
 const PokemonList = ({ 
   pokemonData, 
   currentPage, 
-  onPageChange, 
-  itemsPerPage, 
+  onPageChange,
+  itemsPerPage,
   totalItems 
 }) => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -14,82 +15,56 @@ const PokemonList = ({
   const endIndex = startIndex + itemsPerPage;
   const currentPokemon = pokemonData.slice(startIndex, endIndex);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0
+  const pageTransition = {
+    initial: { opacity: 0, y: 20 },
+    animate: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.3 }
+    },
+    exit: { 
+      opacity: 0, 
+      y: -20,
+      transition: { duration: 0.2 }
     }
   };
 
   return (
     <div>
-      <motion.div 
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {currentPokemon.map(pokemon => (
-          <motion.div
-            key={pokemon?.id || Math.random()}
-            variants={itemVariants}
-            className="flex justify-center"
-          >
-            {pokemon && <PokemonCard pokemon={pokemon} />}
-          </motion.div>
-        ))}
-      </motion.div>
+      <Pagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
 
-      <div className="mt-8 flex justify-center items-center gap-4">
-        <button
-          onClick={() => onPageChange(1)}
-          disabled={currentPage === 1}
-          className="pagination-button"
+      <AnimatePresence mode="wait">
+        <motion.div 
+          key={currentPage}
+          {...pageTransition}
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 my-8"
         >
-          First
-        </button>
-        
-        <button
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="pagination-button"
-        >
-          Previous
-        </button>
+          {currentPokemon.map((pokemon, index) => (
+            <motion.div
+              key={pokemon.id}
+              className="flex justify-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ 
+                opacity: 1, 
+                y: 0,
+                transition: { delay: index * 0.05 }
+              }}
+            >
+              <PokemonCard pokemon={pokemon} />
+            </motion.div>
+          ))}
+        </motion.div>
+      </AnimatePresence>
 
-        <div className="flex items-center gap-2">
-          <span className="text-white font-game">
-            Page {currentPage} of {totalPages}
-          </span>
-        </div>
-
-        <button
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="pagination-button"
-        >
-          Next
-        </button>
-
-        <button
-          onClick={() => onPageChange(totalPages)}
-          disabled={currentPage === totalPages}
-          className="pagination-button"
-        >
-          Last
-        </button>
-      </div>
+      <Pagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </div>
   );
 };

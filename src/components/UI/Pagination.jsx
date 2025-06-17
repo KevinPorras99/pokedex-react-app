@@ -1,26 +1,61 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
-const Pagination = ({ currentPage, totalPages, onNext, onPrevious }) => {
+const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   return (
-    <div className="flex justify-center gap-4 mt-6 mb-8">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex justify-center gap-2 my-4 flex-wrap"
+    >
       <button
-        onClick={onPrevious}
+        onClick={() => onPageChange(1)}
         disabled={currentPage === 1}
-        className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
+        className={`px-4 py-2 rounded-full text-xs transition-all font-game
+          ${currentPage === 1 
+            ? 'bg-gray-400 cursor-not-allowed' 
+            : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+      >
+        First
+      </button>
+
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className={`px-4 py-2 rounded-full text-xs transition-all font-game
+          ${currentPage === 1 
+            ? 'bg-gray-400 cursor-not-allowed' 
+            : 'bg-blue-500 text-white hover:bg-blue-600'}`}
       >
         Previous
       </button>
-      <span className="py-2 text-white">
+      
+      <span className="px-4 py-2 text-xs font-game text-white">
         Page {currentPage} of {totalPages}
       </span>
+      
       <button
-        onClick={onNext}
+        onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-4 py-2 bg-green-500 text-white rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
+        className={`px-4 py-2 rounded-full text-xs transition-all font-game
+          ${currentPage === totalPages 
+            ? 'bg-gray-400 cursor-not-allowed' 
+            : 'bg-blue-500 text-white hover:bg-blue-600'}`}
       >
         Next
       </button>
-    </div>
+
+      <button
+        onClick={() => onPageChange(totalPages)}
+        disabled={currentPage === totalPages}
+        className={`px-4 py-2 rounded-full text-xs transition-all font-game
+          ${currentPage === totalPages 
+            ? 'bg-gray-400 cursor-not-allowed' 
+            : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+      >
+        Last
+      </button>
+    </motion.div>
   );
 };
 

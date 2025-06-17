@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import PokemonList from '../components/Pokemon/PokemonList';
 import SearchBar from '../components/UI/SearchBar';
 import FilterBar from '../components/UI/FilterBar';
+import Header from '../components/UI/Header';
 import api from '../services/api';
 import backgroundImage from '../assets/background.png';
+import Loading from '../components/UI/Loading';
 
 const MAX_POKEMON_ID = 1302;
 const BATCH_SIZE = 50;
@@ -144,19 +146,24 @@ const PokedexPage = () => {
 
   if (loading) {
     return (
-      <div 
-        className="min-h-screen bg-cover bg-center bg-fixed"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${backgroundImage})`
-        }}
-      >
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center pt-20 font-game text-white text-sm"
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black animate-gradient-slow">
+        <div 
+          className="min-h-screen"
+          style={{
+            background: `
+              radial-gradient(circle at 100% 0%, rgba(0,0,0,0.8) 0%, transparent 50%),
+              radial-gradient(circle at 0% 100%, rgba(0,0,0,0.8) 0%, transparent 50%)
+            `
+          }}
         >
-          Loading Pokédex...
-        </motion.div>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center justify-center h-screen"
+          >
+            <Loading />
+          </motion.div>
+        </div>
       </div>
     );
   }
@@ -181,80 +188,65 @@ const PokedexPage = () => {
   }
 
   return (
-    <div 
-      className="min-h-screen bg-cover bg-center bg-fixed"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${backgroundImage})`
-      }}
-    >
-      <div className="container mx-auto px-4 py-8 font-game">
-        <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-bold mb-8 text-center text-white"
-        >
-          Pokédex
-        </motion.h1>
-        
-        <div className="space-y-6 mb-8">
-          <SearchBar 
-            searchTerm={searchTerm}
-            onSearch={handleSearch}
-            placeholder="Search Pokémon by name..."
-          />
-          
-          <FilterBar
-            selectedTypes={selectedTypes}
-            onTypeChange={handleTypeChange}
-          />
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <div 
+        className="flex-1 bg-cover bg-center bg-fixed pt-2" // Added pt-24 for header spacing
+        style={{
+          background: `
+            linear-gradient(to bottom, rgba(0, 0, 0, 0.95), rgba(112, 112, 112, 0.95)),
+            radial-gradient(circle at 100% 0%, rgba(0, 60, 255, 0.4) 0%, transparent 50%),
+            radial-gradient(circle at 0% 100%, rgba(19, 2, 247, 0.4) 0%, transparent 50%)
+          `
+        }}
+      >
+        <div className="container mx-auto px-4 py-8">
+          <div className="space-y-6 mb-8">
+            <SearchBar 
+              searchTerm={searchTerm}
+              onSearch={handleSearch}
+              placeholder="Search Pokémon by name..."
+            />
+            
+            <FilterBar
+              selectedTypes={selectedTypes}
+              onTypeChange={handleTypeChange}
+            />
 
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex justify-center gap-3"
-          >
-            <button
-              onClick={() => handleSort('id')}
-              className={`px-4 py-2 rounded-full text-xs transition-all ${
-                sortBy === 'id' 
-                  ? 'bg-blue-500 text-white' 
-                  : 'bg-gray-200 hover:bg-gray-300'
-              }`}
-            >
-              Sort by ID
-            </button>
-            <button
-              onClick={() => handleSort('name')}
-              className={`px-4 py-2 rounded-full text-xs transition-all ${
-                sortBy === 'name' 
-                  ? 'bg-blue-500 text-white' 
-                  : 'bg-gray-200 hover:bg-gray-300'
-              }`}
-            >
-              Sort by Name
-            </button>
-          </motion.div>
-        </div>
+            <div className="flex justify-center gap-3 flex-wrap">
+              <button
+                onClick={() => handleSort('id')}
+                className={`px-4 py-2 rounded-full text-xs transition-all font-game ${
+                  sortBy === 'id' 
+                    ? 'bg-wine-600 text-white' 
+                    : 'bg-gray-200 hover:bg-wine-600 hover:text-white'
+                }`}
+              >
+                Sort by ID
+              </button>
+              <button
+                onClick={() => handleSort('name')}
+                className={`px-4 py-2 rounded-full text-xs transition-all font-game ${
+                  sortBy === 'name' 
+                    ? 'bg-wine-600 text-white' 
+                    : 'bg-gray-200 hover:bg-wine-600 hover:text-white'
+                }`}
+              >
+                Sort by Name
+              </button>
+            </div>
+          </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center mb-6 text-white text-sm"
-        >
-          Showing {filteredPokemon.length} Pokémon
-          {selectedTypes.length > 0 && ` of types ${selectedTypes.join(' & ')}`}
-          {searchTerm && ` matching "${searchTerm}"`}
-        </motion.div>
-
-        {filteredPokemon.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center mt-8 text-white text-sm"
+            className="text-center mb-6 text-white text-sm font-game"
           >
-            No Pokémon found matching your criteria
+            Showing {filteredPokemon.length} Pokémon
+            {selectedTypes.length > 0 && ` of types ${selectedTypes.join(' & ')}`}
+            {searchTerm && ` matching "${searchTerm}"`}
           </motion.div>
-        ) : (
+
           <PokemonList 
             pokemonData={filteredPokemon}
             currentPage={currentPage}
@@ -262,7 +254,7 @@ const PokedexPage = () => {
             itemsPerPage={20}
             totalItems={filteredPokemon.length}
           />
-        )}
+        </div>
       </div>
     </div>
   );
