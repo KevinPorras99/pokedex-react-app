@@ -7,16 +7,16 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'montserrat': ['Montserrat', 'sans-serif'],
-        'game': ['Montserrat', 'sans-serif'],
+        'quicksand': ['Quicksand', 'sans-serif'],
+        'game': ['Quicksand', 'sans-serif'], 
       },
       fontSize: {
-        'base': '1.125rem',     // 18px
-        'lg': '1.25rem',        // 20px
-        'xl': '1.5rem',         // 24px
-        '2xl': '1.875rem',      // 30px
-        '3xl': '2.25rem',       // 36px
-        '4xl': '3rem',          // 48px
+        'base': '1.25rem',      // 20px
+        'lg': '1.5rem',         // 24px
+        'xl': '1.875rem',       // 30px
+        '2xl': '2.25rem',       // 36px
+        '3xl': '2.75rem',       // 44px
+        '4xl': '3.25rem',       // 52px
       },
       colors: {
         'wine': {
