@@ -54,6 +54,19 @@ const api = {
     }
   },
 
+  async getType(typeName) {
+    try {
+      const response = await fetch(`${BASE_URL}/type/${typeName}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch type ${typeName}: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`Error fetching type ${typeName}:`, error);
+      return null;
+    }
+  },
+
   async getEvolutionChain(url) {
     try {
       const response = await fetch(url);
