@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+// This component handles pagination for a list of items, allowing users to navigate through pages.
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   return (
