@@ -9,27 +9,22 @@ import backgroundImage from '../assets/background.png';
 import Loading from '../components/UI/Loading';
 
 const MAX_POKEMON_ID = 1302;
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 25;
 
 const PokedexPage = () => {
   const [pokemonData, setPokemonData] = useState([]);
   const [filteredPokemon, setFilteredPokemon] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(
-    sessionStorage.getItem('pokedexSearchTerm') || ''
-  );
+  const [searchTerm, setSearchTerm] = useState(sessionStorage.getItem('pokedexSearchTerm') || '');
   const [selectedTypes, setSelectedTypes] = useState(
     JSON.parse(sessionStorage.getItem('pokedexSelectedTypes')) || []
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sortBy, setSortBy] = useState(
-    sessionStorage.getItem('pokedexSortBy') || 'id'
-  );
+  const [sortBy, setSortBy] = useState(sessionStorage.getItem('pokedexSortBy') || 'id');
   const [currentPage, setCurrentPage] = useState(
     parseInt(sessionStorage.getItem('pokedexPage')) || 1
   );
 
-  // Define filterAndSortPokemon before using it
   const filterAndSortPokemon = (term, types, sort, data) => {
     let filtered = [...(data || pokemonData)];
 
@@ -61,67 +56,63 @@ const PokedexPage = () => {
   }, [currentPage, searchTerm, selectedTypes, sortBy]);
 
   useEffect(() => {
-  const loadAllPokemon = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    const loadAllPokemon = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        let loadedPokemon = [];
 
-      // Get initial list of all Pokémon
-      const allData = await api.getAllPokemon(MAX_POKEMON_ID, 0);
-      console.log(`Found ${allData.results.length} Pokémon to load`);
+        const allData = await api.getAllPokemon(MAX_POKEMON_ID, 0);
+        const total = allData.results.length;
+        console.log(`Found ${total} Pokémon to load`);
 
-      let loadedPokemon = [];
-      for (const pokemon of allData.results) {
-        try {
-          const details = await api.getPokemonByName(pokemon.name);
-          if (details) {
-            const processedPokemon = {
-              id: details.id,
-              name: details.name,
-              types: details.types.map(t => t.type.name),
-              sprites: {
-                front_default: details.sprites.front_default,
-                other: {
-                  'official-artwork': {
-                    front_default: details.sprites.other?.['official-artwork']?.front_default
+        for (let i = 0; i < total; i += BATCH_SIZE) {
+          const batch = allData.results.slice(i, i + BATCH_SIZE);
+
+          const promises = batch.map(async (pokemon) => {
+            const cached = sessionStorage.getItem(`poke-${pokemon.name}`);
+            if (cached) {
+              return JSON.parse(cached);
+            } else {
+              const details = await api.getPokemonByName(pokemon.name);
+              const processed = {
+                id: details.id,
+                name: details.name,
+                types: details.types.map(t => t.type.name),
+                sprites: {
+                  front_default: details.sprites.front_default,
+                  other: {
+                    'official-artwork': {
+                      front_default: details.sprites.other?.['official-artwork']?.front_default
+                    }
                   }
                 }
-              }
-            };
-
-            loadedPokemon.push(processedPokemon);
-            
-            // Sort and update state every 10 Pokémon
-            if (loadedPokemon.length % 10 === 0) {
-              const sortedPokemon = [...loadedPokemon].sort((a, b) => a.id - b.id);
-              setPokemonData(sortedPokemon);
-              filterAndSortPokemon(searchTerm, selectedTypes, sortBy, sortedPokemon);
-              
-              const progress = Math.round((loadedPokemon.length / allData.results.length) * 100);
-              console.log(`Progress: ${progress}% (${loadedPokemon.length}/${allData.results.length})`);
+              };
+              sessionStorage.setItem(`poke-${pokemon.name}`, JSON.stringify(processed));
+              return processed;
             }
-          }
-        } catch (error) {
-          console.error(`Failed to load ${pokemon.name}:`, error);
-          continue;
+          });
+
+          const results = await Promise.all(promises);
+          loadedPokemon.push(...results);
+
+          const progress = Math.round((loadedPokemon.length / total) * 100);
+          console.log(`Progress: ${progress}% (${loadedPokemon.length}/${total})`);
         }
+
+        loadedPokemon.sort((a, b) => a.id - b.id);
+        setPokemonData(loadedPokemon);
+        filterAndSortPokemon(searchTerm, selectedTypes, sortBy, loadedPokemon);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading Pokémon:', error);
+        setError('Error loading Pokémon. Please try again.');
+        setLoading(false);
       }
+    };
 
-      // Final update with all loaded Pokémon
-      const finalPokemon = [...loadedPokemon].sort((a, b) => a.id - b.id);
-      setPokemonData(finalPokemon);
-      filterAndSortPokemon(searchTerm, selectedTypes, sortBy, finalPokemon);
-      setLoading(false);
-
-    } catch (error) {
-      console.error('Error loading Pokémon:', error);
-      setError('Error loading Pokémon. Please try again.');
-      setLoading(false);
-    }
-  };
-
-  loadAllPokemon();
-}, []);
+    loadAllPokemon();
+  }, []);
 
   const handleSearch = (term) => {
     setSearchTerm(term);
@@ -147,7 +138,7 @@ const PokedexPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black animate-gradient-slow">
-        <div 
+        <div
           className="min-h-screen"
           style={{
             background: `
@@ -156,7 +147,7 @@ const PokedexPage = () => {
             `
           }}
         >
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex items-center justify-center h-screen"
@@ -170,13 +161,13 @@ const PokedexPage = () => {
 
   if (error) {
     return (
-      <div 
+      <div
         className="min-h-screen bg-cover bg-center bg-fixed"
         style={{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${backgroundImage})`
         }}
       >
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="text-center pt-20 font-game text-red-500 text-sm"
@@ -190,8 +181,8 @@ const PokedexPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <div 
-        className="flex-1 bg-cover bg-center bg-fixed pt-2" // Added pt-24 for header spacing
+      <div
+        className="flex-1 bg-cover bg-center bg-fixed pt-2"
         style={{
           background: `
             linear-gradient(to bottom, rgba(0, 0, 0, 0.95), rgba(112, 112, 112, 0.95)),
@@ -202,23 +193,21 @@ const PokedexPage = () => {
       >
         <div className="container mx-auto px-4 py-8">
           <div className="space-y-6 mb-8">
-            <SearchBar 
+            <SearchBar
               searchTerm={searchTerm}
               onSearch={handleSearch}
               placeholder="Search Pokémon by name..."
             />
-            
             <FilterBar
               selectedTypes={selectedTypes}
               onTypeChange={handleTypeChange}
             />
-
             <div className="flex justify-center gap-3 flex-wrap">
               <button
                 onClick={() => handleSort('id')}
                 className={`px-4 py-2 rounded-full text-xs transition-all font-game ${
-                  sortBy === 'id' 
-                    ? 'bg-wine-600 text-white' 
+                  sortBy === 'id'
+                    ? 'bg-wine-600 text-white'
                     : 'bg-gray-200 hover:bg-wine-600 hover:text-white'
                 }`}
               >
@@ -227,8 +216,8 @@ const PokedexPage = () => {
               <button
                 onClick={() => handleSort('name')}
                 className={`px-4 py-2 rounded-full text-xs transition-all font-game ${
-                  sortBy === 'name' 
-                    ? 'bg-wine-600 text-white' 
+                  sortBy === 'name'
+                    ? 'bg-wine-600 text-white'
                     : 'bg-gray-200 hover:bg-wine-600 hover:text-white'
                 }`}
               >
@@ -247,7 +236,7 @@ const PokedexPage = () => {
             {searchTerm && ` matching "${searchTerm}"`}
           </motion.div>
 
-          <PokemonList 
+          <PokemonList
             pokemonData={filteredPokemon}
             currentPage={currentPage}
             onPageChange={handlePageChange}
